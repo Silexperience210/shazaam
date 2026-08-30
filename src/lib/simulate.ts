@@ -3,9 +3,8 @@ import {
   bytesToHex,
   deriveSilentPaymentOutputs,
   generateInputKey,
-  hexToBytes,
 } from "./silent-payments";
-import { sha256 } from "@noble/hashes/sha2.js";
+import { getBolt12Invoice } from "./bolt12";
 
 export type Rail = "lightning" | "silent";
 
@@ -57,25 +56,37 @@ export function deriveSilentPayment(): Pick<
 }
 
 /**
- * PLACEHOLDER — branchement d'une vraie offre BOLT 12 (milestone 2).
+ * Facture BOLT 12 RÉELLE depuis l'offre `silex@21pay.org`, via le bolt12-server
+ * (LNDK). La clé API vit côté serveur (env BOLT12_API_KEY) — jamais dans le bundle.
  *
- * La relation preimage → payment_hash est réelle (SHA-256), mais la facture
- * n'est pas encore signée par un nœud : elle sera générée via invoice_request
- * sur un nœud Lightning avec offres BOLT 12.
+ * Si le bolt12-server est injoignable ou que l'invoice_request n'aboutit pas
+ * (cas « self-payment » encore en timeout), on renvoie un état explicite au lieu
+ * d'inventer une fausse facture.
  */
-export function deriveLightningInvoice(): Pick<
-  Receipt,
-  "paymentHash" | "preimage" | "invoice" | "k" | "id"
-> {
-  const preimage = randomHex(32);
-  const paymentHash = bytesToHex(sha256(hexToBytes(preimage)));
-  return {
-    id: paymentHash.slice(0, 16),
-    paymentHash,
-    preimage,
-    invoice: `lnbc…${paymentHash.slice(0, 40)}…`,
-    k: 0,
-  };
+export async function deriveLightningInvoice(opts: {
+  amountSats: number;
+}): Promise<Pick<Receipt, "paymentHash" | "preimage" | "invoice" | "k" | "id">> {
+  try {
+    const result = await getBolt12Invoice({
+      data: { offer: RECIPIENT.lno, amountSats: opts.amountSats },
+    });
+    const invoice = result.invoice;
+    return {
+      id: invoice.slice(0, 16) || randomHex(8),
+      paymentHash: result.paymentHash || "—",
+      preimage: "révélé au règlement",
+      invoice,
+      k: 0,
+    };
+  } catch (err) {
+    return {
+      id: randomHex(8),
+      paymentHash: "—",
+      preimage: "—",
+      invoice: `BOLT12 indisponible — ${err instanceof Error ? err.message : "erreur"}`,
+      k: 0,
+    };
+  }
 }
 
 export const LIGHTNING_STEPS = [

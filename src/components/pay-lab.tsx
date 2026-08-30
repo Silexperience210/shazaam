@@ -72,13 +72,15 @@ export function PayLab() {
     later(stepMs() * 2.2, () => setPhase("ready"));
   }
 
-  function pay() {
+  async function pay() {
     clearTimers();
     setPhase("paying");
     setStep(0);
 
     const derived =
-      rail === "lightning" ? deriveLightningInvoice() : deriveSilentPayment();
+      rail === "lightning"
+        ? await deriveLightningInvoice({ amountSats: amount })
+        : deriveSilentPayment();
 
     const receipt: Receipt = {
       rail,

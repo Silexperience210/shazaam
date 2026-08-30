@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Umbra",
+      "hasCanvas": false,
+      "bodyTextLen": 2230,
+      "bodyTextHash": "a3ea07c219900063f721df126a342397ab0e0b27898535761c5b157ceb9d8c0f",
+      "bodyTextPrefix": "Umbra Système Laboratoire Architecture BIP-352 · BOLT 12 · BIP-3",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Umbra",
+      "hasCanvas": false,
+      "bodyTextLen": 2230,
+      "bodyTextHash": "a3ea07c219900063f721df126a342397ab0e0b27898535761c5b157ceb9d8c0f",
+      "bodyTextPrefix": "Umbra Système Laboratoire Architecture BIP-352 · BOLT 12 · BIP-3",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}

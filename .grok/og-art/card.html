@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @font-face {
+        font-family: "Instrument Serif";
+        src: url("fonts/InstrumentSerif-Regular.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 400;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "IBM Plex Sans";
+        src: url("fonts/IBMPlexSans-Regular.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 400;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "IBM Plex Sans";
+        src: url("fonts/IBMPlexSans-Medium.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 500;
+        font-display: block;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 1200px;
+        height: 630px;
+        background: #0b0c0d;
+        overflow: hidden;
+      }
+      .stage {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        background:
+          radial-gradient(ellipse 58% 62% at 50% 44%, #16181c 0%, #0b0c0d 72%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .hairline {
+        position: absolute;
+        inset: 36px;
+        border: 1px solid #c5cdd8;
+        opacity: 0.22;
+        pointer-events: none;
+      }
+      .lockup {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .mark {
+        width: 84px;
+        height: 84px;
+        border-radius: 12px;
+        background: #c5cdd8;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 0 90px rgba(197, 205, 216, 0.12);
+      }
+      .mark svg {
+        width: 44px;
+        height: 44px;
+        display: block;
+      }
+      h1 {
+        margin: 28px 0 0;
+        font-family: "Instrument Serif", "Times New Roman", serif;
+        font-weight: 400;
+        font-size: 168px;
+        line-height: 0.88;
+        letter-spacing: -0.028em;
+        color: #ececea;
+      }
+      p {
+        margin: 22px 0 0;
+        font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+        font-weight: 500;
+        font-size: 15px;
+        line-height: 1;
+        letter-spacing: 0.34em;
+        text-transform: uppercase;
+        color: #8b8e93;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="hairline" aria-hidden="true"></div>
+      <div class="lockup">
+        <div class="mark" aria-hidden="true">
+          <svg viewBox="0 0 16 16">
+            <path
+              fill="#0b0c0d"
+              fill-rule="evenodd"
+              d="M8 1.2 3.2 4.1v7.8L8 14.8l4.8-2.9V4.1L8 1.2Zm0 1.7 3.2 1.9v.9L8 4.8 4.8 5.7v-.9L8 2.9Zm-3.2 3.3 3.2 1.9 3.2-1.9v1.15L8 9.25 4.8 7.35V6.2Zm0 2.4 3.2 1.9 3.2-1.9v1.2L8 11.7 4.8 9.8V8.6Z"
+            />
+          </svg>
+        </div>
+        <h1>Umbra</h1>
+        <p>Silent payments</p>
+      </div>
+    </div>
+  </body>
+</html>

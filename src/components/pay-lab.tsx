@@ -36,13 +36,11 @@ export function PayLab() {
   const [step, setStep] = useState(0);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [current, setCurrent] = useState<Receipt | null>(null);
-  const [nonce] = useState(() => Math.random().toString(36).slice(2));
   const timers = useRef<number[]>([]);
 
   const rail: Rail = lnUp ? "lightning" : "silent";
   const uri = useMemo(() => buildUri({ amountBtc: amount / 100_000_000 }), [amount]);
   const steps = rail === "lightning" ? LIGHTNING_STEPS : SILENT_STEPS;
-  const k = receipts.filter((r) => r.rail === rail).length;
 
   useEffect(() => {
     return () => {
@@ -74,15 +72,13 @@ export function PayLab() {
     later(stepMs() * 2.2, () => setPhase("ready"));
   }
 
-  async function pay() {
+  function pay() {
     clearTimers();
     setPhase("paying");
     setStep(0);
 
     const derived =
-      rail === "lightning"
-        ? await deriveLightningInvoice({ amountSats: amount, nonce, k })
-        : await deriveSilentPayment({ amountSats: amount, nonce, k });
+      rail === "lightning" ? deriveLightningInvoice() : deriveSilentPayment();
 
     const receipt: Receipt = {
       rail,

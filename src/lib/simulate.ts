@@ -1,6 +1,11 @@
 import { RECIPIENT } from "./identity";
-
-const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+import {
+  bytesToHex,
+  deriveSilentPaymentOutputs,
+  generateInputKey,
+  hexToBytes,
+} from "./silent-payments";
+import { sha256 } from "@noble/hashes/sha2.js";
 
 export type Rail = "lightning" | "silent";
 
@@ -18,93 +23,58 @@ export type Receipt = {
   k: number;
 };
 
-export async function sha256(input: string): Promise<Uint8Array> {
-  const data = new TextEncoder().encode(input);
-  return new Uint8Array(await crypto.subtle.digest("SHA-256", data));
+function randomHex(nBytes: number): string {
+  const b = new Uint8Array(nBytes);
+  crypto.getRandomValues(b);
+  return bytesToHex(b);
 }
 
-export function toHex(bytes: Uint8Array, len?: number) {
-  const hex = [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
-  return len ? hex.slice(0, len) : hex;
-}
-
-function to5bit(bytes: Uint8Array): number[] {
-  const out: number[] = [];
-  let acc = 0;
-  let bits = 0;
-  for (const b of bytes) {
-    acc = (acc << 8) | b;
-    bits += 8;
-    while (bits >= 5) {
-      bits -= 5;
-      out.push((acc >> bits) & 31);
-    }
-  }
-  if (bits > 0) out.push((acc << (5 - bits)) & 31);
-  return out;
-}
-
-export function encodeBech32(hrp: string, version: string, bytes: Uint8Array, dataLen: number) {
-  const chars = to5bit(bytes).map((v) => CHARSET[v]!);
-  while (chars.length < dataLen) {
-    chars.push(CHARSET[chars.length % 32]!);
-  }
-  return `${hrp}1${version}${chars.slice(0, dataLen).join("")}`;
-}
-
-async function digestTwice(seed: string) {
-  const a = await sha256(seed);
-  const b = await sha256(toHex(a) + seed);
-  const out = new Uint8Array(64);
-  out.set(a, 0);
-  out.set(b, 32);
-  return out;
-}
-
-export async function deriveSilentPayment(opts: {
-  amountSats: number;
-  nonce: string;
-  k: number;
-}): Promise<Pick<Receipt, "taprootOutput" | "sharedSecret" | "inputHash" | "k" | "id">> {
-  const seed = [
-    "bip352",
-    opts.nonce,
-    String(opts.k),
-    String(opts.amountSats),
-    RECIPIENT.scanPub,
-    RECIPIENT.spendPub,
-  ].join("|");
-  const bytes = await digestTwice(seed);
-  const inputHash = toHex(bytes.subarray(0, 16));
-  const shared = toHex(bytes.subarray(16, 48));
-  const taprootOutput = encodeBech32("bc", "p", bytes.subarray(32, 64), 58);
+/**
+ * Dérivation Silent Payment (BIP-352) RÉELLE.
+ *
+ * Alice génère un input neuf (clé + outpoint aléatoire) à chaque paiement :
+ * l'adresse bc1p produite est donc distincte à chaque règlement, indiscernable
+ * d'un Taproot banal, et ne révèle jamais l'identifiant sp1q on-chain.
+ */
+export function deriveSilentPayment(): Pick<
+  Receipt,
+  "taprootOutput" | "sharedSecret" | "inputHash" | "k" | "id"
+> {
+  const { privKey, pubKey } = generateInputKey();
+  const res = deriveSilentPaymentOutputs({
+    inputs: [{ privKey, pubKey }],
+    outpoints: [{ txid: randomHex(32), vout: 0 }],
+    recipients: [{ scanPub: RECIPIENT.scanPub, spendPub: RECIPIENT.spendPub }],
+  });
+  const out = res.outputs[0];
   return {
-    id: toHex(bytes.subarray(0, 8)),
-    taprootOutput,
-    sharedSecret: `ss_${shared.slice(0, 24)}`,
-    inputHash,
-    k: opts.k,
+    id: res.inputHash.slice(0, 16),
+    taprootOutput: out.address,
+    sharedSecret: res.sharedSecret,
+    inputHash: res.inputHash,
+    k: out.k,
   };
 }
 
-export async function deriveLightningInvoice(opts: {
-  amountSats: number;
-  nonce: string;
-  k: number;
-}): Promise<Pick<Receipt, "paymentHash" | "preimage" | "invoice" | "k" | "id">> {
-  const seed = ["bolt12", opts.nonce, String(opts.k), String(opts.amountSats), RECIPIENT.lno].join(
-    "|",
-  );
-  const bytes = await digestTwice(seed);
-  const preimage = toHex(bytes.subarray(0, 32));
-  const paymentHash = toHex(bytes.subarray(32, 64));
-  const invoice = encodeBech32("lnbc", "", bytes.subarray(8, 40), 72).replace("lnbc1", "lnbc");
+/**
+ * PLACEHOLDER — branchement d'une vraie offre BOLT 12 (milestone 2).
+ *
+ * La relation preimage → payment_hash est réelle (SHA-256), mais la facture
+ * n'est pas encore signée par un nœud : elle sera générée via invoice_request
+ * sur un nœud Lightning avec offres BOLT 12.
+ */
+export function deriveLightningInvoice(): Pick<
+  Receipt,
+  "paymentHash" | "preimage" | "invoice" | "k" | "id"
+> {
+  const preimage = randomHex(32);
+  const paymentHash = bytesToHex(sha256(hexToBytes(preimage)));
   return {
-    id: toHex(bytes.subarray(0, 8)),
+    id: paymentHash.slice(0, 16),
     paymentHash,
     preimage,
-    invoice: `${invoice}1p${CHARSET[opts.k % 32]}qq`,
-    k: opts.k,
+    invoice: `lnbc…${paymentHash.slice(0, 40)}…`,
+    k: 0,
   };
 }
 

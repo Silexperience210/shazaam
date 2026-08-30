@@ -6,10 +6,10 @@ export const RECIPIENT = {
   dnsType: "TXT",
   label: "21pay",
   scanPub:
-    "02c8a3f0e1d94b6c7a2f91d0b4e8c6a1f3d5b7c9e0a2d4f6b8c0e2a4d6f8b0c2e4",
+    "03eeba6e494e05eb6ee6bbe7b852eb0102b9a0bd0f4cfc6a8cf8057fc2514958a1",
   spendPub:
-    "03a91c4e7b2d80f5c6e1a3b9d0f2c4e6a8b0d2f4c6e8a0b2d4f6c8e0a2b4d6f8c0",
-  sp: "sp1qqgste7k9hx0dql4cu80wv2rqxevajuz34em0d5jkkf0n4w5q8n2k42u7w0s3jn54",
+    "037879f533bb6689707dd69ad168d9789e5e32742dffff5ede993613664ddace74",
+  sp: "sp1qq0ht5mjffcz7kmhxh0nms5htqyptng9apax0c65vlqzhlsj3f9v2zqmc086n8wmx39c8m456695dj7y7tce8gt0lla0daxfkzdnymkkwws9put0u",
   lno: "lno1zcss9mk8y3wle8tee4gef8ty6cvwgum7ghj9npqpqssyh3w4x5k7m9n2p4r6t8v0w1y3z5a7c9e",
   nodeAlias: "21pay",
 } as const;

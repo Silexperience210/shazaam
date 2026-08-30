@@ -150,7 +150,7 @@ export const SILENT_STEPS = [
   {
     id: "ecdh",
     title: "Secret partagé",
-    detail: "ECDH : input_hash · a · Bscan. Seuls Alice et le scan de Rob peuvent le recalculer.",
+    detail: "ECDH : input_hash · a · Bscan. Seuls Alice et le scan de Silex peuvent le recalculer.",
   },
   {
     id: "tweak",
@@ -160,7 +160,7 @@ export const SILENT_STEPS = [
   {
     id: "scan",
     title: "Détection silencieuse",
-    detail: "Le scanner de Rob parcourt les filtres compacts, recalcule P, reconnaît la sortie. Rien on-chain ne pointe vers sp1q.",
+    detail: "Le scanner de Silex parcourt les filtres compacts, recalcule P, reconnaît la sortie. Rien on-chain ne pointe vers sp1q.",
   },
 ] as const;
 

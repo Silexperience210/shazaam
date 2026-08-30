@@ -88,7 +88,7 @@ else:
 # jamais réutiliser une adresse classique`}
           </pre>
           <p className="mt-4 max-w-2xl text-sm text-muted">
-            L’expéditeur ne choisit pas le rail. Alice paie Rob. Le portefeuille
+            L’expéditeur ne choisit pas le rail. Alice paie Silex. Le portefeuille
             décide. C’est toute l’UX.
           </p>
         </section>

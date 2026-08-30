@@ -12,7 +12,7 @@ function LabPage() {
           Laboratoire
         </p>
         <h1 className="mt-3 font-display text-4xl text-fg sm:text-5xl">
-          Alice paie Rob.
+          Alice paie Silex.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
           Un nom, un montant, un bouton. Coupe Lightning pour forcer le repli

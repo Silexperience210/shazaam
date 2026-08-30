@@ -1,66 +1,59 @@
+import { encode } from "uqr";
 import { cn } from "@/lib/utils";
 
-const SIZE = 25;
+type Ecc = "L" | "M" | "Q" | "H";
 
-function fnv(str: string) {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
+const QUIET_ZONE = 4; // modules — requis par la spec QR pour un scan fiable
 
-function finderValue(x: number, y: number): boolean | null {
-  const inPattern = (ox: number, oy: number) => {
-    const dx = x - ox;
-    const dy = y - oy;
-    if (dx < 0 || dy < 0 || dx > 6 || dy > 6) return null;
-    const onBorder = dx === 0 || dy === 0 || dx === 6 || dy === 6;
-    const inCore = dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4;
-    return onBorder || inCore;
-  };
-  return inPattern(0, 0) ?? inPattern(SIZE - 7, 0) ?? inPattern(0, SIZE - 7);
-}
-
-function isTiming(x: number, y: number) {
-  if (finderValue(x, y) !== null) return false;
-  return x === 6 || y === 6;
-}
-
-function modulesFor(payload: string) {
-  const seed = fnv(payload);
-  const cells: boolean[][] = [];
-  for (let y = 0; y < SIZE; y++) {
-    const row: boolean[] = [];
-    for (let x = 0; x < SIZE; x++) {
-      const finder = finderValue(x, y);
-      if (finder !== null) {
-        row.push(finder);
-        continue;
-      }
-      if (isTiming(x, y)) {
-        row.push((x + y) % 2 === 0);
-        continue;
-      }
-      const n = fnv(`${seed}:${x}:${y}:${payload.length}`);
-      row.push((n & 3) !== 0);
+/**
+ * Encode `payload` en un vrai QR scannable (uqr, zéro dépendance).
+ * Retourne null si le contenu dépasse la capacité même en ECC minimal.
+ */
+function encodeReal(payload: string, ecc: Ecc): { size: number; cells: boolean[][] } | null {
+  // Essaie le niveau demandé, puis descend en ECC si le contenu est trop long.
+  for (const level of [ecc, "M", "L"] as const) {
+    try {
+      const qr = encode(payload, { ecc: level, border: QUIET_ZONE });
+      return { size: qr.size, cells: qr.data };
+    } catch {
+      /* payload trop long pour ce niveau — on tente le suivant */
     }
-    cells.push(row);
   }
-  return cells;
+  return null;
 }
 
 export function QrMark({
   payload,
   className,
   label,
+  ecc = "M",
 }: {
   payload: string;
   className?: string;
   label?: string;
+  ecc?: Ecc;
 }) {
-  const cells = modulesFor(payload);
+  const qr = encodeReal(payload, ecc);
+
+  if (!qr) {
+    return (
+      <div
+        className={cn(
+          "relative aspect-square rounded-[var(--radius-md)] bg-fg p-3",
+          className,
+        )}
+        role="img"
+        aria-label="QR illisible — contenu trop long"
+      >
+        <div className="grid size-full place-items-center text-center font-mono text-[9px] leading-tight text-accent-fg">
+          contenu trop long
+          <br />
+          pour un QR
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -70,8 +63,12 @@ export function QrMark({
       role="img"
       aria-label={label ?? "QR unifié"}
     >
-      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="size-full" shapeRendering="crispEdges">
-        {cells.map((row, y) =>
+      <svg
+        viewBox={`0 0 ${qr.size} ${qr.size}`}
+        className="size-full"
+        shapeRendering="crispEdges"
+      >
+        {qr.cells.map((row, y) =>
           row.map((on, x) =>
             on ? (
               <rect

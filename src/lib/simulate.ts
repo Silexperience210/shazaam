@@ -56,7 +56,7 @@ export function deriveSilentPayment(): Pick<
 }
 
 /**
- * Facture BOLT 12 RÉELLE depuis l'offre `silex@silexperience.org`, via le bolt12-server
+ * Facture BOLT 12 RÉELLE depuis l'offre `silex@21pay.org`, via le bolt12-server
  * (LNDK). La clé API vit côté serveur (env BOLT12_API_KEY) — jamais dans le bundle.
  *
  * Si le bolt12-server est injoignable ou que l'invoice_request n'aboutit pas

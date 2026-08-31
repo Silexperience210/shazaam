@@ -1,8 +1,8 @@
 export const RECIPIENT = {
   name: "Silex",
-  handle: "silex@silexperience.org",
-  display: "silex@silexperience.org",
-  dnsHost: "silex.user._bitcoin-payment.silexperience.org",
+  handle: "silex@21pay.org",
+  display: "silex@21pay.org",
+  dnsHost: "silex.user._bitcoin-payment.21pay.org",
   dnsType: "TXT",
   label: "21pay",
   scanPub:

@@ -1,8 +1,8 @@
 export const RECIPIENT = {
   name: "Silex",
-  handle: "silex@21pay.org",
-  display: "silex@21pay.org",
-  dnsHost: "silex.user._bitcoin-payment.21pay.org",
+  handle: "silex@silexperience.org",
+  display: "silex@silexperience.org",
+  dnsHost: "silex.user._bitcoin-payment.silexperience.org",
   dnsType: "TXT",
   label: "21pay",
   scanPub:
@@ -32,7 +32,10 @@ export function buildUri(opts?: { amountBtc?: number; memo?: string }) {
 }
 
 export function dnsRecord(uri: string) {
-  return `"bitcoin ${uri.slice("bitcoin:".length)}"`;
+  // BIP-353 : le TXT contient l'URI `bitcoin:` complet. Le fournisseur DNS
+  // (Cloudflare) le découpe en character-strings ≤ 255 octets ; le wallet
+  // les concatène sans séparateur (§ resolution du BIP-353).
+  return uri;
 }
 
 function trimAmount(n: number) {

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Shield, Zap } from "lucide-react";
+import { Shield, Zap } from "lucide-react";
 import { BtcTicker } from "@/components/btc-ticker";
+import { DonateButton } from "@/components/donate";
 import { IdentityCard } from "@/components/identity-card";
 import { Lightning } from "@/components/lightning";
 import { Magnetic } from "@/components/magnetic";
@@ -40,12 +41,7 @@ function Home() {
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Magnetic>
-                <Button asChild size="lg">
-                  <Link to="/lab">
-                    Payer
-                    <ArrowRight />
-                  </Link>
-                </Button>
+                <DonateButton />
               </Magnetic>
               <Magnetic strength={0.6}>
                 <Button asChild size="lg" variant="outline">

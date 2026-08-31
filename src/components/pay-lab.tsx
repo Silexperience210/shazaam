@@ -24,6 +24,8 @@ import {
   stepMs,
 } from "@/lib/simulate";
 import { cn } from "@/lib/utils";
+import { PaymentExplosion } from "@/components/payment-explosion";
+import { AnimateNumber } from "@/components/animate-number";
 
 type Phase = "compose" | "resolve" | "ready" | "paying" | "settled";
 
@@ -36,6 +38,7 @@ export function PayLab() {
   const [step, setStep] = useState(0);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [current, setCurrent] = useState<Receipt | null>(null);
+  const [explode, setExplode] = useState(false);
   const timers = useRef<number[]>([]);
 
   const rail: Rail = lnUp ? "lightning" : "silent";
@@ -97,11 +100,14 @@ export function PayLab() {
       setCurrent(receipt);
       setReceipts((prev) => [receipt, ...prev].slice(0, 8));
       setPhase("settled");
+      setExplode(true);
     });
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-start">
+    <>
+      <PaymentExplosion trigger={explode} />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-start">
       <section className="rounded-[var(--radius-xl)] bg-surface p-4 shadow-[inset_0_0_0_1px_var(--color-border)] sm:p-6">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -142,7 +148,7 @@ export function PayLab() {
               </button>
             ))}
           </div>
-          <p className="mt-2 text-xs tabular-nums text-muted">{formatBtc(amount)}</p>
+          <p className="mt-2 text-xs tabular-nums text-muted"><AnimateNumber value={amount} format={formatBtc} /></p>
         </fieldset>
 
         <div className="mt-5 flex items-center justify-between gap-3 rounded-[var(--radius-md)] bg-bg px-3 py-3 shadow-[inset_0_0_0_1px_var(--color-border)]">
@@ -212,7 +218,8 @@ export function PayLab() {
         <ReceiverPanel phase={phase} current={current} receipts={receipts} />
         {receipts.length > 0 && <History receipts={receipts} />}
       </section>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -412,7 +419,7 @@ function Incoming({ receipt }: { receipt: Receipt }) {
         Reçu
       </p>
       <p className="mt-1 font-display text-3xl tabular-nums text-fg">
-        {formatSats(receipt.amountSats)}
+        <AnimateNumber value={receipt.amountSats} format={formatSats} />
         <span className="ml-1 text-lg text-muted">sats</span>
       </p>
       <p className="mt-2 text-sm text-muted">

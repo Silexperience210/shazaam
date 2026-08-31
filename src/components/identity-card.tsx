@@ -1,5 +1,6 @@
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import { Magnetic } from "@/components/magnetic";
 import { QrMark } from "@/components/qr-mark";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,13 +22,7 @@ export function IdentityCard({ className }: { className?: string }) {
   }
 
   return (
-    <article
-      className={cn(
-        "rounded-[var(--radius-xl)] bg-surface p-4 sm:p-5",
-        "shadow-[inset_0_0_0_1px_var(--color-border)]",
-        className,
-      )}
-    >
+    <article className={cn("glow-card p-4 sm:p-5", className)}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-subtle">Recevoir</p>
@@ -42,12 +37,16 @@ export function IdentityCard({ className }: { className?: string }) {
       </div>
 
       <div className="mt-5 grid gap-5 sm:grid-cols-[minmax(0,9.5rem)_1fr] sm:items-start">
-        <QrMark payload={uri} className="mx-auto w-40 sm:w-full" label="QR BIP-321 unifié" />
+        <Magnetic strength={0.4}>
+          <QrMark
+            payload={uri}
+            className="mx-auto w-40 sm:w-full transition-[filter,transform] duration-[var(--motion-slow)] hover:scale-[1.04] hover:drop-shadow-[0_0_18px_rgba(247,147,26,0.45)]"
+            label="QR BIP-321 unifié"
+          />
+        </Magnetic>
         <div className="min-w-0">
           <p className="font-mono text-sm text-fg sm:text-base">₿{RECIPIENT.display}</p>
-          <p className="mt-1 text-sm text-muted">
-            Un nom. Deux rails. Des adresses toujours neuves.
-          </p>
+          <p className="mt-1 text-sm text-muted">Un nom. Deux rails. Des adresses toujours neuves.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={() => copy("handle", RECIPIENT.handle)}>
               {copied === "handle" ? <Check /> : <Copy />}

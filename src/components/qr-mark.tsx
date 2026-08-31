@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { encode } from "uqr";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,28 @@ function encodeReal(payload: string, ecc: Ecc): { size: number; cells: boolean[]
   return null;
 }
 
+/**
+ * Construit le `d` d'un unique <path> pour toutes les cellules allumées.
+ *
+ * Deux raisons (review Claude, bug « no QR » Phoenix) :
+ * 1. Un seul nœud DOM au lieu de ~11 000 <rect> — plus de jointures, plus de
+ *    dérive de snapping aux pixels physiques.
+ * 2. Plus de `shapeRendering="crispEdges"` : à une échelle non-entière
+ *    (ex. 149 modules dans 136 px = facteur 0,913), l'antialiasing par défaut
+ *    évite que des modules 1×1 disparaissent — les patterns de timing et
+ *    d'alignement restent intacts avant le passage de la caméra.
+ */
+function modulesPath(cells: boolean[][]): string {
+  let d = "";
+  for (let y = 0; y < cells.length; y++) {
+    const row = cells[y];
+    for (let x = 0; x < row.length; x++) {
+      if (row[x]) d += `M${x} ${y}h1v1h-1z`;
+    }
+  }
+  return d;
+}
+
 export function QrMark({
   payload,
   className,
@@ -33,7 +56,7 @@ export function QrMark({
   label?: string;
   ecc?: Ecc;
 }) {
-  const qr = encodeReal(payload, ecc);
+  const qr = useMemo(() => encodeReal(payload, ecc), [payload, ecc]);
 
   if (!qr) {
     return (
@@ -54,6 +77,8 @@ export function QrMark({
     );
   }
 
+  const d = useMemo(() => modulesPath(qr.cells), [qr]);
+
   return (
     <div
       className={cn(
@@ -66,23 +91,9 @@ export function QrMark({
       <svg
         viewBox={`0 0 ${qr.size} ${qr.size}`}
         className="size-full"
-        shapeRendering="crispEdges"
+        aria-hidden="true"
       >
-        {qr.cells.map((row, y) =>
-          row.map((on, x) =>
-            on ? (
-              <rect
-                key={`${x}-${y}`}
-                x={x}
-                y={y}
-                width={1}
-                height={1}
-                fill="currentColor"
-                className="text-accent-fg"
-              />
-            ) : null,
-          ),
-        )}
+        <path d={d} fill="currentColor" className="text-accent-fg" />
       </svg>
     </div>
   );

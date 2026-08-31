@@ -112,7 +112,7 @@ export function DonateButton() {
     }
   }
 
-  const lightningUri = invoice ? `lightning:${invoice}` : "";
+  const lightningUri = invoice ? `LIGHTNING:${invoice.toUpperCase()}` : "";
 
   return (
     <>

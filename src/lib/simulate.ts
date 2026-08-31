@@ -4,7 +4,7 @@ import {
   deriveSilentPaymentOutputs,
   generateInputKey,
 } from "./silent-payments";
-import { getBolt12Invoice } from "./bolt12";
+import { getBolt11Invoice } from "./bolt12";
 
 export type Rail = "lightning" | "silent";
 
@@ -67,12 +67,12 @@ export async function deriveLightningInvoice(opts: {
   amountSats: number;
 }): Promise<Pick<Receipt, "paymentHash" | "preimage" | "invoice" | "k" | "id">> {
   try {
-    const result = await getBolt12Invoice({
-      data: { offer: RECIPIENT.lno, amountSats: opts.amountSats },
+    const result = await getBolt11Invoice({
+      data: { amountSats: opts.amountSats, description: "Don 21pay" },
     });
-    const invoice = result.invoice;
+    const invoice = result.paymentRequest;
     return {
-      id: invoice.slice(0, 16) || randomHex(8),
+      id: result.paymentHash.slice(0, 16) || randomHex(8),
       paymentHash: result.paymentHash || "—",
       preimage: "révélé au règlement",
       invoice,
@@ -83,7 +83,7 @@ export async function deriveLightningInvoice(opts: {
       id: randomHex(8),
       paymentHash: "—",
       preimage: "—",
-      invoice: `BOLT12 indisponible — ${err instanceof Error ? err.message : "erreur"}`,
+      invoice: `Facture indisponible — ${err instanceof Error ? err.message : "erreur"}`,
       k: 0,
     };
   }

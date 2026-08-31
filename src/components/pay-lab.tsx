@@ -24,6 +24,7 @@ import {
   stepMs,
 } from "@/lib/simulate";
 import { cn } from "@/lib/utils";
+import { checkPaymentSettled } from "@/lib/bolt12";
 import { PaymentExplosion } from "@/components/payment-explosion";
 import { AnimateNumber } from "@/components/animate-number";
 
@@ -96,12 +97,28 @@ export function PayLab() {
     steps.forEach((_, i) => {
       later(delay * (i + 1), () => setStep(i + 1));
     });
-    later(delay * (steps.length + 1), () => {
+    const settle = () => {
       setCurrent(receipt);
       setReceipts((prev) => [receipt, ...prev].slice(0, 8));
       setPhase("settled");
       setExplode(true);
-    });
+    };
+
+    // Règlement RÉEL pour le Lightning (BOLT 11) : on poll le nœud jusqu'au paiement.
+    if (rail === "lightning" && receipt.paymentHash && receipt.paymentHash !== "—") {
+      const poll = async () => {
+        try {
+          const res = await checkPaymentSettled({ data: { paymentHash: receipt.paymentHash! } });
+          if (res.settled) return settle();
+        } catch { /* réessaie */ }
+        const id = window.setTimeout(poll, 3000);
+        timers.current.push(id);
+      };
+      later(delay * (steps.length + 1), poll);
+    } else {
+      // On-chain (Silent) ou sans hash : pas de détection temps réel → timer démo.
+      later(delay * (steps.length + 1), settle);
+    }
   }
 
   return (
